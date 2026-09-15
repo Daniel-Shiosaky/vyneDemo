@@ -37,8 +37,14 @@ export default defineConfig({
   timeout: 45_000,
   expect: { timeout: 10_000 },
 
+  /**
+   * `list` is included in CI on purpose: the `github` reporter only prints dots plus
+   * inline annotations, so a passing run shows `·····` and nothing about which tests ran.
+   * `list` names every test and its duration, which is what makes the CI log readable.
+   */
   reporter: isCI
     ? [
+        ['list'],
         ['github'],
         ['html', { open: 'never', outputFolder: 'playwright-report' }],
         ['junit', { outputFile: 'test-results/junit.xml' }],
