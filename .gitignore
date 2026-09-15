@@ -1,0 +1,35 @@
+# ---- Secrets: never commit these ----
+.env
+.env.*
+!.env.example
+
+# ---- Dependencies ----
+node_modules/
+
+# ---- Playwright output ----
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+playwright/.auth/
+
+# ---- Build ----
+dist/
+*.tsbuildinfo
+
+# ---- Logs ----
+*.log
+npm-debug.log*
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# ---- Throwaway exploration scripts (not part of the framework) ----
+.explore/
+
+# ---- Authenticated sessions written by global-setup (contain live cookies) ----
+.auth/
