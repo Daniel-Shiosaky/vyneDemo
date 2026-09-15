@@ -15,24 +15,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Two jobs, one per suite. They are independent and run in parallel: the API job needs no browser
+# and no credentials, so it finishes in seconds rather than waiting on the Chromium download.
+#
+# Note: typecheck, lint and format are NOT run here. Use `npm run verify` locally before pushing -
+# CI will not catch a type error, a lint violation or formatting drift.
 jobs:
-  static-checks:
-    name: Typecheck, lint and format
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 20
-          cache: npm
-
-      - run: npm ci
-
-      - name: Verify types, lint rules and formatting
-        run: npm run verify
-
   api-tests:
     name: API tests
     runs-on: ubuntu-latest
@@ -42,7 +30,7 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - run: npm ci
@@ -72,7 +60,7 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - run: npm ci

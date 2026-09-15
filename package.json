@@ -5,7 +5,7 @@
   "description": "Playwright + TypeScript test automation framework for SauceDemo (UI) and JSONPlaceholder (API), using the Page Object Model.",
   "type": "commonjs",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "test:ui": "playwright test --project=ui-chromium",

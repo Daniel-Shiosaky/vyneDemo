@@ -33,7 +33,7 @@ npm run test:ui               # 20 UI journeys (+ 1 auth setup step)
 npm run test:api              # 4 API journeys
 ```
 
-Requires **Node 20+**.
+Requires **Node 22+** (Node 20 is end-of-life). CI runs Node 24.
 
 > Run the two suites separately, as above. `npx playwright test` with no `--project` runs both.
 
