@@ -11,6 +11,15 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
 
+  // Plain Node scripts run outside the TypeScript project, so they need the Node globals
+  // declared explicitly - otherwise `process` reads as undefined.
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: { process: 'readonly' },
+    },
+  },
+
   // Type-aware linting applies only to the TypeScript sources listed in tsconfig.json.
   // This config file itself is plain ESM and is not part of the project, so it must be
   // excluded here or the typed parser fails to resolve it.
