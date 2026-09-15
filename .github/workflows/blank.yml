@@ -1,0 +1,103 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Both suites hit third-party sites, so a nightly run catches upstream drift
+  # (a changed locator, a changed record count) before a PR does.
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-checks:
+    name: Typecheck, lint and format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Verify types, lint rules and formatting
+        run: npm run verify
+
+  api-tests:
+    name: API tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # No browser download and no SauceDemo credentials needed: the api project has no
+      # dependency on the ui-setup project, so authentication never runs here.
+      - name: Run API tests
+        run: npm run test:api
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL || 'https://jsonplaceholder.typicode.com' }}
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: api-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+
+  ui-tests:
+    name: UI tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium
+        run: npm run install:browsers
+
+      # The ui-setup project runs first automatically (declared as a dependency) and writes the
+      # authenticated session to .auth/. That file holds a live cookie and is gitignored; it is
+      # never uploaded as an artifact.
+      - name: Run UI tests
+        run: npm run test:ui
+        env:
+          WEB_BASE_URL: ${{ vars.WEB_BASE_URL || 'https://www.saucedemo.com' }}
+          # Credentials come from repository secrets - never from a committed file.
+          # Configure under Settings > Secrets and variables > Actions.
+          PASSWORD: ${{ secrets.PASSWORD }}
+          USERNAME: ${{ secrets.SAUCE_USERNAME }}
+          LOCKED_OUT_USERNAME: ${{ secrets.LOCKED_OUT_USERNAME }}
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: ui-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
